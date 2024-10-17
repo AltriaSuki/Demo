@@ -1,7 +1,7 @@
 #include"myFrame.h"
 #include"draw.h"
 #include <wx/splitter.h>
-MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(600, 400)) {
+MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(1200, 800)) {
 	menuBar = new wxMenuBar;
 	file = new wxMenu;
 	file->Append(wxID_NEW, wxT("&News"));
@@ -25,18 +25,18 @@ MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaul
 	wxSplitterWindow* splitter = new wxSplitterWindow(this);
 	wxPanel* controlPanel = new wxPanel(splitter);
 	Draw* drawPanel = new Draw(splitter);
-	splitter->SplitVertically(controlPanel, drawPanel, 100);
+	splitter->SplitVertically(controlPanel, drawPanel, 200);
 	Bind(wxEVT_SIZE, &MyFrame::OnResize, this);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnOpenFileClick, this, wxID_OPEN);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnNewClick, this, wxID_NEW);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnSaveClick, this, wxID_SAVE);
 	//工具栏部分
 	     wxImage::AddHandler(new wxPNGHandler);
-        wxBitmap exit(_T("copy.png"), wxBITMAP_TYPE_PNG);
-        wxToolBar* toolbar = CreateToolBar();
-        toolbar->AddTool(wxID_EXIT, _T("Exit application"), exit);
-        toolbar->Realize();
-        Connect(wxID_EXIT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MyFrame::onQuit));
+        ////wxBitmap exit(_T("copy.png"), wxBITMAP_TYPE_PNG);
+        //wxToolBar* toolbar = CreateToolBar();
+        //toolbar->AddTool(wxID_EXIT, _T("Exit application"), exit);
+        //toolbar->Realize();
+        //Connect(wxID_EXIT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MyFrame::onQuit));
         Centre();
 
 

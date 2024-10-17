@@ -9,4 +9,7 @@ public:
 	wxMenu* file;
 	wxMenu* imp;
 	void OnResize(wxSizeEvent& event);
+	void OnOpenFileClick(wxCommandEvent& event);
+	void OnNewClick(wxCommandEvent& event);
+	void OnSaveClick(wxCommandEvent& enent);
 };

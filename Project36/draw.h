@@ -7,6 +7,7 @@ public :
 	void OnMouseDown(wxMouseEvent& event);
 	void OnMouseUp(wxMouseEvent& event);
 	void OnMotion(wxMouseEvent& event);
+	void OnResize(wxSizeEvent& event);
 private:
 	bool isDrawing = false;
 	wxPoint startpoint,endpoint;

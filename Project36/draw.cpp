@@ -1,9 +1,25 @@
 #include"draw.h"
 Draw::Draw(wxWindow *parent) :wxPanel(parent) {
+	
 	Bind(wxEVT_PAINT, &Draw::OnPaint, this);
 	Bind(wxEVT_LEFT_DOWN, &Draw::OnMouseDown, this);
 	Bind(wxEVT_MOTION, &Draw::OnMotion, this);
 	Bind(wxEVT_LEFT_UP, &Draw::OnMouseUp, this);
+	Bind(wxEVT_SIZE, &Draw::OnResize, this);
+}
+void Draw::OnResize(wxSizeEvent& event) {
+	// 在窗口大小变化时重新创建位图以适应新尺寸
+	if (GetClientSize().GetWidth() > 0 && GetClientSize().GetHeight() > 0) {
+		wxBitmap newBitmap(GetClientSize());
+		wxMemoryDC memDC(newBitmap);
+		memDC.Clear();
+		if (bitMap.IsOk()) {
+			// 将旧的绘图内容拷贝到新的位图中
+			memDC.DrawBitmap(bitMap, 0, 0);
+		}
+		bitMap = newBitmap;
+	}
+	Refresh();  
 }
 void Draw::OnPaint(wxPaintEvent& event) {
 	wxPaintDC dc(this);

@@ -1,12 +1,15 @@
 #include"draw.h"
+#include<wx/dcbuffer.h>
 Draw::Draw(wxWindow *parent) :wxPanel(parent) {
-	
+	SetBackgroundStyle(wxBG_STYLE_PAINT);
 	Bind(wxEVT_PAINT, &Draw::OnPaint, this);
 	Bind(wxEVT_LEFT_DOWN, &Draw::OnMouseDown, this);
 	Bind(wxEVT_MOTION, &Draw::OnMotion, this);
 	Bind(wxEVT_LEFT_UP, &Draw::OnMouseUp, this);
 	Bind(wxEVT_SIZE, &Draw::OnResize, this);
+
 }
+
 void Draw::OnResize(wxSizeEvent& event) {
 	// 在窗口大小变化时重新创建位图以适应新尺寸
 	if (GetClientSize().GetWidth() > 0 && GetClientSize().GetHeight() > 0) {
@@ -22,13 +25,8 @@ void Draw::OnResize(wxSizeEvent& event) {
 	Refresh();  
 }
 void Draw::OnPaint(wxPaintEvent& event) {
-	wxPaintDC dc(this);
-	if (!bitMap.IsOk()) {
-		bitMap = wxBitmap(GetClientSize());//创建一个与窗口大小一样的位图
-		wxMemoryDC memDC(bitMap);
-		memDC.Clear();
-	}
-	dc.DrawBitmap(bitMap,0,0);//将位图绘制到窗口的（0，0）位置。
+	wxAutoBufferedPaintDC dc(this);
+	dc.DrawBitmap(bitMap, 0, 0);
 }
 void Draw::OnMouseDown(wxMouseEvent& event) {
 	isDrawing = true;

@@ -1,11 +1,20 @@
 #pragma once
 #include<wx/wx.h>
-class Element :public wxButton {
+#include<vector>
+#include"Shape.h"
+class Element {
 public:
-	Element(wxWindow* parent,const wxString &title);
-	void OnLeftDown(wxMouseEvent& event);
-	void OnMotion(wxMouseEvent& event);
-	void OnLeftUp(wxMouseEvent& event);
+	std::vector<Shape> shapes;
+	Element() {}
+	void Select(const wxPoint& point);
+	void ChangeColor(wxDC& dc);
+	void MoveSelected(const wxPoint& point);
+	void DeselectAll();
+	void DeleteSelected();
+	void StartDragging(const wxPoint& point);
+	void EndDragging(const wxPoint& point);
+	void UpdateDragging(const wxPoint& point);
+	bool isSelect = false;
 private:
 	bool isDragging = false;
 	wxPoint startpoint, endpoint;

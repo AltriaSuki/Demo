@@ -1,5 +1,7 @@
 #pragma once
 #include<wx/wx.h>
+#include"draw.h"
+#include <wx/splitter.h>
 class MyFrame :public wxFrame {
 public:
 	MyFrame(const wxString& title);
@@ -12,4 +14,10 @@ public:
 	void OnOpenFileClick(wxCommandEvent& event);
 	void OnNewClick(wxCommandEvent& event);
 	void OnSaveClick(wxCommandEvent& enent);
+	void AddButton(const wxString& label);
+	void OnMyItemClick(wxCommandEvent& event);
+private:
+	wxSplitterWindow* splitter;
+	wxPanel* controlPanel;
+	Draw* drawPanel;
 };

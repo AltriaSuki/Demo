@@ -1,13 +1,12 @@
 #pragma once
 #include<wx/wx.h>
-#include<vector>
+#include<list>
 #include"Shape.h"
 class Element {
 public:
-	std::vector<Shape> shapes;
-	Element() {}
-	void Select(const wxPoint& point);
-	void ChangeColor(wxDC& dc);
+	
+	Element() {};
+	bool Select(const wxPoint& point);
 	void MoveSelected(const wxPoint& point);
 	void DeselectAll();
 	void DeleteSelected();
@@ -15,7 +14,8 @@ public:
 	void EndDragging(const wxPoint& point);
 	void UpdateDragging(const wxPoint& point);
 	bool isSelect = false;
-private:
+	std::list<Shape> shapes;
+
 	bool isDragging = false;
 	wxPoint startpoint, endpoint;
 };

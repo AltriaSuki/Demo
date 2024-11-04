@@ -20,3 +20,11 @@ bool Shape::Contains(const wxPoint& p) {
 	}
 	return false;
 }
+void Shape::Move(double dx,double dy) {
+	start.x += dx;
+	start.y += dy;
+	center.x += dx;
+	center.y += dy;
+	end.x += dx;
+	end.y += dy;
+}

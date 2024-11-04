@@ -1,36 +1,22 @@
 #include "element.h"
 #include "nlohmann/json.hpp"
 #include <fstream>
-#include <vector>
-void Element::Select(const wxPoint& point) {
-	wxRect rect;
+#include<list>
+extern wxColour color;
+bool Element::Select(const wxPoint& point) {
+	isSelect = false;
 	for (auto& shape : shapes) {
 		if (shape.Contains(point)) {
 			isSelect = true;
 			break;
 		}
 	}
-}
-void Element::ChangeColor(wxDC& dc) {
 	if (isSelect) {
-		for (auto& shape : shapes) {
-			if (shape.Contains(startpoint)) {
-				dc.SetPen(*wxRED_PEN);
-				shape.Draw(dc);
-			}
-			else {
-				dc.SetPen(*wxBLACK_PEN);
-				shape.Draw(dc);
-			}
-		}
+		return true;
 	}
-	else {
-		for (auto& shape : shapes) {
-			dc.SetPen(*wxBLACK_PEN);
-			shape.Draw(dc);
-		}
-	}
+	else return false;
 }
+
 void Element::MoveSelected(const wxPoint& point) {
 	if (isSelect) {
 		wxPoint delta = point - startpoint;

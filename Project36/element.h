@@ -5,7 +5,9 @@
 class Element {
 public:
 	
-	Element() {};
+	Element() :type(0), id(0), isDragging(false),isSelect(false) {};
+	Element(const Element& element);
+	Element& operator=(const Element& element);
 	bool Select(const wxPoint& point);
 	void MoveSelected(const wxPoint& point);
 	void DeselectAll();
@@ -16,6 +18,8 @@ public:
 	bool isSelect = false;
 	std::list<Shape> shapes;
 
-	bool isDragging = false;
+	int type;
+	int id;
+	bool isDragging;
 	wxPoint startpoint, endpoint;
 };

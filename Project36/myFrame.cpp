@@ -4,7 +4,10 @@
 #include"element.h"
 #include <wx/splitter.h>
 #include"nlohmann/json.hpp"
+#include<vector>
 using json = nlohmann::json;
+int currentToolId = 1000;
+bool DrawMode = false;
 MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(1200, 800)) {
 	menuBar = new wxMenuBar;
 	file = new wxMenu;
@@ -20,20 +23,15 @@ MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaul
 	file->Append(wxID_ABOUT, "About", "Show something about");
 	menuBar->Append(file, wxT("&File"));
 	SetMenuBar(menuBar);
-	CreateStatusBar(2);//״̬��
+	CreateStatusBar(2);
 	SetStatusText(wxT("welcome to wxWidgets!"));
-	//Connect(wxID_CLOSE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(SimpleMenu::onQuit));
 	
 	Centre();
 
 	splitter = new wxSplitterWindow(this);
 	controlPanel = new wxPanel(splitter);
 	drawPanel = new Draw(splitter);
-
 	splitter->SplitVertically(controlPanel, drawPanel,200);
-	/*splitter->SetSashGravity(0.5);
-	splitter->SetMinimumPaneSize(20);*/
-	//splitter->SetSashSize(5);
 	
 	//工具栏部分
 	     wxImage::AddHandler(new wxPNGHandler);
@@ -43,21 +41,19 @@ MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaul
         //toolbar->Realize();
         //Connect(wxID_EXIT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MyFrame::onQuit));
 	wxToolBar* toolBar = CreateToolBar();
-	
-	toolBar->AddTool(1, "Add Button", wxNullBitmap);
-	toolBar->AddTool(2, "Add Text", wxNullBitmap);
+	toolBar->AddTool(0, "And Gate", wxNullBitmap);
+	toolBar->AddTool(1, "Or Gate", wxNullBitmap);
+	toolBar->AddTool(2, "NotAnd Gate", wxNullBitmap);
 	toolBar->Realize();
-	////MyItem* targetItem = new MyItem(this);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::onQuit, this, wxID_CLOSE);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::onAbout, this, wxID_ABOUT);
 	Bind(wxEVT_SIZE, &MyFrame::OnResize, this);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnOpenFileClick, this, wxID_OPEN);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnNewClick, this, wxID_NEW);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::OnSaveClick, this, wxID_SAVE);
-	Bind(wxEVT_TOOL, &MyFrame::OnMyItemClick, this);
+	//Bind(wxEVT_TOOL, &MyFrame::DrawAll, this);
+	Bind(wxEVT_TOOL, &MyFrame::OnToolClicked, this);
     Centre();
-
-
 }
 void MyFrame::OnResize(wxSizeEvent& event) {
 	Layout();
@@ -94,35 +90,27 @@ void MyFrame::OnNewClick(wxCommandEvent& event)//点击new
  {
 
  }
- //void MyFrame::AddButton(const wxString& label) {
-	// Element* newButton = new Element(drawPanel, label);
- //}
- void MyFrame::OnMyItemClick(wxCommandEvent& event) {
+
+
+ void MyFrame::OnToolClicked(wxCommandEvent& event) {
+
 	 int toolId = event.GetId();
-	 if (toolId == 1) { 
-		
-	 }
-	 else if (toolId == 2) { 
-		 
-	 }
+	 currentToolId = toolId;
+	 //drawPanel->DrawAll();//应该为createSomeKindOfElement
+	 drawPanel->CreateElement();
 	 event.Skip();
  }
- void MyFrame::LordFromJSON(const std::string& filename) {
-	 std::ifstream file(filename);
-	 int key;
-	 if (filename == "and_gate.json") {
-		 key = 0;
-	 }
-	 if (file.is_open()) {
-		 json data;
-		 file >> data;
-		 file.close();
-		 for (const auto& shape : data["shapes"]) {
-			 const std::string& type = shape["type"];
-			 wxPoint start(shape["start"]["x"], shape["start"]["y"]);
-			 wxPoint end(shape["end"]["x"], shape["end"]["y"]);
-			 wxPoint center(shape["center"]["x"], shape["center"]["y"]);
-			 elements[key].shapes.push_back(Shape(type, start, end, center));
-		 }
-	 }
- }
+ //void MyFrame::DrawAll(wxCommandEvent&event) {
+	// wxMemoryDC memDC(drawPanel->bitMap);
+	// wxPen pen(*wxGREEN, 2);
+	// memDC.SetPen(pen);
+	// switch (currentToolId) {
+	// case 0:
+	//	 for (auto& shape : AndGate.shapes) {
+	//		 shape.Draw(memDC);
+	//	 }
+	//	 break;
+	// }
+	// currentToolId = 5;
+	// event.Skip();
+ //}

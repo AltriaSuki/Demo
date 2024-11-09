@@ -3,6 +3,7 @@
 #include"draw.h"
 #include <wx/splitter.h>
 #include<fstream>
+#include<list>
 #include"element.h"
 class MyFrame :public wxFrame {
 public:
@@ -12,15 +13,17 @@ public:
 	wxMenuBar* menuBar;
 	wxMenu* file;
 	wxMenu* imp;
-	std::vector<Element> elements;
+	Element AndGate;
 	void OnResize(wxSizeEvent& event);
+	void DrawAll(wxCommandEvent&event);
 	void OnOpenFileClick(wxCommandEvent& event);
 	void OnNewClick(wxCommandEvent& event);
 	void OnSaveClick(wxCommandEvent& enent);
-	void LordFromJSON(const std::string& filename);
-	void OnMyItemClick(wxCommandEvent& event);
+	void OnToolClicked(wxCommandEvent& event);
 private:
+	//int currentToolId = 1000;
 	wxSplitterWindow* splitter;
 	wxPanel* controlPanel;
 	Draw* drawPanel;
+	wxPaintDC* dc;
 };

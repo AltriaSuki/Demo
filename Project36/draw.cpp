@@ -6,8 +6,14 @@
 using json = nlohmann::json;
 extern int currentToolId;
 extern bool DrawMode;
+bool isDragging = false;
+wxPoint dragStartPos;
 wxColour color = *wxBLUE;
+int currentElementId = -1;
+int currentElementTypeId =-1;
 Draw::Draw(wxWindow *parent) :wxPanel(parent) {
+	for (int i = 0; i < 100; i++)
+		id[i] = 0;
 	LoadFromJSON("and_gate.json");
 	LoadFromJSON("or_gate.json");
 	LoadFromJSON("Nand_gate.json");
@@ -34,8 +40,28 @@ void Draw::OnResize(wxSizeEvent& event) {
 	Refresh();  
 }
 void Draw::OnPaint(wxPaintEvent& event) {
-	wxAutoBufferedPaintDC dc(this);
-	dc.DrawBitmap(bitMap, 0, 0);
+	//wxAutoBufferedPaintDC dc(this);
+	wxMemoryDC memDC(bitMap);
+	//memDC.Clear();
+	//if (currentElementId != -1) {
+	//	for (auto& element : elements) {
+	//		if (element.id == currentElementId) {
+	//			for (auto& shape : element.shapes) {
+	//				wxPen pen(*wxRED, 2);
+	//				memDC.SetPen(pen);
+	//				shape.Draw(memDC);
+	//			}
+	//		}
+	//		else {
+	//			for (auto& shape : element.shapes) {
+	//				wxPen pen(color, 2);
+	//				memDC.SetPen(pen);
+	//				shape.Draw(memDC);
+	//			}
+	//		}
+	//	}
+	//}
+	memDC.DrawBitmap(bitMap, 0, 0);
 }
 void Draw::OnMouseDown(wxMouseEvent& event) {
 	startpoint = event.GetPosition();
@@ -54,12 +80,9 @@ void Draw::OnMotion(wxMouseEvent& event) {
 	endpoint = currentPoint;
 	wxClientDC dc(this);
 	dc.DrawBitmap(bitMap, 0, 0);
-
-	wxPen pen(*wxGREEN, 2);
+	wxPen pen(color, 1);
 	dc.SetPen(pen);
 	if (isDrawing) {
-
-
 		wxPoint MiddlePoint(currentPoint.x, startpoint.y);
 
 		dc.DrawLine(startpoint, MiddlePoint);
@@ -67,17 +90,34 @@ void Draw::OnMotion(wxMouseEvent& event) {
 
 	}
 	else if (!DrawMode) {//有问题
-		if (AndGate.isSelect) {
-			for (auto& shape : AndGate.shapes) {
-				shape.Draw(dc);
-			}
-
+		wxPoint offset = currentPoint - dragStartPos;
+		dragStartPos = currentPoint;
+		for (auto& shape : AndGate.shapes) {
+			shape.Draw(dc);
 		}
+		if (currentElementId != -1) {
+			for (auto& element : elements) {
+				if (element.id == currentElementId) {
+					for (auto& shape : element.shapes) {
+						shape.Move(offset.x, offset.y);
+						shape.Draw(dc);
+					}
+				}
+				else {
+					for (auto& shape : element.shapes) {
+						shape.Draw(dc);
+					}
+				}
+			}
+		}
+		
+		Refresh();
 	}
 }
 void Draw::OnMouseUp(wxMouseEvent& event) {
 	wxMemoryDC memDC(bitMap);
-	wxPen pen(*wxGREEN, 2);
+	memDC.Clear();
+	wxPen pen(color, 1);
 	memDC.SetPen(pen);
 	if (DrawMode) {
 		isDrawing = false;
@@ -88,19 +128,65 @@ void Draw::OnMouseUp(wxMouseEvent& event) {
 		memDC.DrawLine(MiddlePoint, endpoint);
 	}
 	else {
-		double dx = endpoint.x - startpoint.x;
-		double dy = endpoint.y - startpoint.y;
-		if (AndGate.isSelect) {//有问题
-			for (auto& shape : AndGate.shapes) {
-				shape.Move(dx, dy);
+		for (auto& element : elements) {
+			if (element.id == currentElementId) {
+				for (auto& shape : element.shapes)
+					shape.Draw(memDC);
+				currentElementId = -1;
 			}
-			for (auto& shape : AndGate.shapes) {
-				shape.Draw(memDC);
+			else {
+				for (auto& shape : element.shapes)
+					shape.Draw(memDC);
 			}
 		}
-		startpoint = endpoint;
+		Refresh();
+		
 
 	}
+}
+
+//void Draw::DrawAll() {
+//	wxMemoryDC memDC(bitMap);
+//	wxPen pen(color, 2);
+//	memDC.SetPen(pen);
+//	switch (currentToolId) {
+//	case 0:
+//		for (auto& shape : AndGate.shapes) {
+//			shape.DrawInit(memDC);
+//		}
+//		break;
+//	case 1:
+//		for (auto& shape : OrGate.shapes) {
+//			shape.DrawInit(memDC);
+//		}
+//		break;
+//	case 2:
+//		for (auto& shape : NandGate.shapes) {
+//			shape.DrawInit(memDC);
+//		}
+//		break;
+//	}
+//	
+//
+//	Refresh(); 
+//}
+void Draw::ElementSelect(wxMouseEvent& event) {
+	/*wxString message = wxString::Format("The number is: %d", currentElementId);
+	wxMessageBox(message, "Success", wxICON_INFORMATION);*/
+	wxPoint p = event.GetPosition();
+	wxMemoryDC memDC(bitMap);
+	memDC.Clear();
+		for (auto& element : elements) {
+			if (element.Select(p)) {
+				element.isSelect = true;
+				currentElementId = element.id;
+				currentElementTypeId = element.type;
+				break;
+			}
+		}
+		Refresh();
+		/*wxString newmessage = wxString::Format("The number is: %d", currentElementId);
+		wxMessageBox(newmessage, "Success", wxICON_INFORMATION);*/
 }
 void Draw::LoadFromJSON(const std::string& filename) {
 	std::ifstream file(filename);
@@ -131,7 +217,6 @@ void Draw::LoadFromJSON(const std::string& filename) {
 			case 1:
 				OrGate.shapes.push_back(Shape(type, start, center, end));
 				break;
-
 			case 2:
 				NandGate.shapes.push_back(Shape(type, start, center, end));
 				break;
@@ -142,39 +227,49 @@ void Draw::LoadFromJSON(const std::string& filename) {
 		wxMessageBox("Failed to open file", "Error", wxICON_ERROR);
 	}
 }
-void Draw::DrawAll() {
+void Draw::CreateElement() {
 	wxMemoryDC memDC(bitMap);
-	wxPen pen(color, 2);
+	wxPen pen(color, 1);
 	memDC.SetPen(pen);
-	switch (currentToolId) {
+	/*switch (currentToolId) {
 	case 0:
 		for (auto& shape : AndGate.shapes) {
-			shape.Draw(memDC);
+			shape.DrawInit(memDC);
 		}
 		break;
 	case 1:
 		for (auto& shape : OrGate.shapes) {
-			shape.Draw(memDC);
+			shape.DrawInit(memDC);
 		}
 		break;
 	case 2:
 		for (auto& shape : NandGate.shapes) {
-			shape.Draw(memDC);
+			shape.DrawInit(memDC);
 		}
 		break;
+	}*/
+	Element NewElement;
+	switch (currentToolId) {
+	case 0:
+		NewElement = AndGate;
+		NewElement.id = id[0]++;
+		elements.push_back(NewElement);
+		break;
+	case 1:
+		NewElement = OrGate;
+		NewElement.id = id[1]++;
+		elements.push_back(NewElement);
+		break;
+	case 2:
+		NewElement = NandGate;
+		NewElement.id = id[2]++;
+		elements.push_back(NewElement);
+		break;
 	}
-	
-
-	Refresh(); 
-}
-void Draw::ElementSelect(wxMouseEvent& event) {
-	wxPoint p = event.GetPosition();
-	wxMemoryDC memDC(bitMap);
-		if (AndGate.Select(p)) {
-			wxColour newcolor = *wxRED;
-			color = newcolor;
-			DrawAll();
-			color = *wxBLUE;
-		}
-	//DrawAll();
+	for (auto& shape : NewElement.shapes) {
+		shape.DrawInit(memDC);
+	}
+	wxString message = wxString::Format("The number is: %d", NewElement.id);
+	wxMessageBox(message, "Success", wxICON_INFORMATION);
+	Refresh();
 }

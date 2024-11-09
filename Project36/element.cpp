@@ -2,7 +2,26 @@
 #include "nlohmann/json.hpp"
 #include <fstream>
 #include<list>
+#include"Shape.h"
 extern wxColour color;
+Element::Element(const Element& element) {
+	for (auto& shape : element.shapes) {
+		this->shapes.push_back(shape);
+	}
+	this->type = element.type;
+	this->id = element.id;
+
+}
+Element& Element::operator=(const Element& element) {//该函数的前提是左值是空的
+	if (this == &element)return *this;
+	for (auto& shape : element.shapes) {
+		Shape newShape(shape.type,shape.start, shape.center, shape.end);
+		this->shapes.push_back(newShape);
+	}
+	this->type = element.type;
+	this->id = element.id;
+	return *this;
+}
 bool Element::Select(const wxPoint& point) {
 	isSelect = false;
 	for (auto& shape : shapes) {
@@ -56,29 +75,6 @@ void Element::UpdateDragging(const wxPoint& point) {
 		endpoint = point;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -5,6 +5,7 @@
 #include<fstream>
 #include<list>
 #include"element.h"
+#include"controlPanel.h"
 class MyFrame :public wxFrame {
 public:
 	MyFrame(const wxString& title);
@@ -20,10 +21,12 @@ public:
 	void OnNewClick(wxCommandEvent& event);
 	void OnSaveClick(wxCommandEvent& enent);
 	void OnToolClicked(wxCommandEvent& event);
+	void onTreeClick(int id);
+
 private:
 	//int currentToolId = 1000;
 	wxSplitterWindow* splitter;
-	wxPanel* controlPanel;
+	control* controlPanel;
 	Draw* drawPanel;
 	wxPaintDC* dc;
 };

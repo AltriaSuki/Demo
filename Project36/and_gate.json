@@ -1,0 +1,41 @@
+{
+  "shapes": [
+    {
+      "type": "line",
+      "start": [ 20, 20 ],
+      "end": [ 20, 70 ]
+    },
+    {
+      "type": "line",
+      "start": [ 20, 20 ],
+      "end": [ 95, 20]
+    },
+    {
+      "type": "line",
+      "start": [ 20, 70 ],
+      "end": [ 95, 70]
+    },
+    {
+      "type": "line",
+      "start": [ 20, 35],
+      "end": [ 5, 35 ]
+    },
+    {
+      "type": "line",
+      "start": [ 20, 55 ],
+      "end": [ 5, 55]
+    },
+
+    {
+      "type": "line",
+      "start": [ 120, 45],
+      "end": [135,45]
+    },
+      {
+        "type": "arc",
+        "start": [ 95, 70 ],
+        "end": [ 95, 20 ],
+        "center": [ 95, 45 ]
+      }
+  ]
+}

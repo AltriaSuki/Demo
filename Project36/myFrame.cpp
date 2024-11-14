@@ -29,7 +29,7 @@ MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaul
 	Centre();
 
 	splitter = new wxSplitterWindow(this);
-	controlPanel = new wxPanel(splitter);
+	controlPanel = new control(splitter);
 	drawPanel = new Draw(splitter);
 	splitter->SplitVertically(controlPanel, drawPanel,200);
 	
@@ -41,9 +41,9 @@ MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaul
         //toolbar->Realize();
         //Connect(wxID_EXIT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MyFrame::onQuit));
 	wxToolBar* toolBar = CreateToolBar();
-	toolBar->AddTool(0, "And Gate", wxNullBitmap);
-	toolBar->AddTool(1, "Or Gate", wxNullBitmap);
-	toolBar->AddTool(2, "NotAnd Gate", wxNullBitmap);
+	wxBitmap bitmap(wxT("D:\\wxtest\\bothWXdemo\\and_gate2.png"), wxBITMAP_TYPE_PNG);
+	toolBar->AddTool(0, "And Gate", bitmap);
+
 	toolBar->Realize();
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::onQuit, this, wxID_CLOSE);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::onAbout, this, wxID_ABOUT);
@@ -91,13 +91,23 @@ void MyFrame::OnNewClick(wxCommandEvent& event)//点击new
 
  }
 
+ void MyFrame::onTreeClick(int id)
+ {
+	 currentToolId = id;
+	 //drawPanel->DrawAll();//应该为createSomeKindOfElement
+	 drawPanel->CreateElement();
+
+ }
 
  void MyFrame::OnToolClicked(wxCommandEvent& event) {
 
 	 int toolId = event.GetId();
 	 currentToolId = toolId;
+	 if (toolId <=10&&toolId>=0) {
+		 drawPanel->CreateElement();
+		 
+	 }
 	 //drawPanel->DrawAll();//应该为createSomeKindOfElement
-	 drawPanel->CreateElement();
 	 event.Skip();
  }
  //void MyFrame::DrawAll(wxCommandEvent&event) {

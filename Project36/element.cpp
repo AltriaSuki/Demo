@@ -4,6 +4,9 @@
 #include<list>
 #include"Shape.h"
 extern wxColour color;
+Element::~Element() {
+	this->shapes.clear();
+}
 Element::Element(const Element& element) {
 	for (auto& shape : element.shapes) {
 		this->shapes.push_back(shape);
@@ -12,7 +15,7 @@ Element::Element(const Element& element) {
 	this->id = element.id;
 
 }
-Element& Element::operator=(const Element& element) {//¸Ãº¯ÊýµÄÇ°ÌáÊÇ×óÖµÊÇ¿ÕµÄ
+Element& Element::operator=(const Element& element) {//ï¿½Ãºï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½Ç¿Õµï¿½
 	if (this == &element)return *this;
 	for (auto& shape : element.shapes) {
 		Shape newShape(shape.type,shape.start, shape.center, shape.end);

@@ -15,8 +15,8 @@ Draw::Draw(wxWindow *parent) :wxPanel(parent) {
 	for (int i = 0; i < 100; i++)
 		id[i] = 0;
 	LoadFromJSON("and_gate.json");
-	LoadFromJSON("or_gate.json");
-	LoadFromJSON("Nand_gate.json");
+	/*LoadFromJSON("or_gate.json");
+	LoadFromJSON("Nand_gate.json");*/
 	SetBackgroundStyle(wxBG_STYLE_PAINT);
 	Bind(wxEVT_PAINT, &Draw::OnPaint, this);
 	Bind(wxEVT_LEFT_DOWN, &Draw::OnMouseDown, this);
@@ -26,13 +26,13 @@ Draw::Draw(wxWindow *parent) :wxPanel(parent) {
 }
 
 void Draw::OnResize(wxSizeEvent& event) {
-	// ÔÚ´°¿Ú´óÐ¡±ä»¯Ê±ÖØÐÂ´´½¨Î»Í¼ÒÔÊÊÓ¦ÐÂ³ß´ç
+	// ï¿½Ú´ï¿½ï¿½Ú´ï¿½Ð¡ï¿½ä»¯Ê±ï¿½ï¿½ï¿½Â´ï¿½ï¿½ï¿½Î»Í¼ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½Â³ß´ï¿½
 	if (GetClientSize().GetWidth() > 0 && GetClientSize().GetHeight() > 0) {
 		wxBitmap newBitmap(GetClientSize());
 		wxMemoryDC memDC(newBitmap);
 		memDC.Clear();
 		if (bitMap.IsOk()) {
-			// ½«¾ÉµÄ»æÍ¼ÄÚÈÝ¿½±´µ½ÐÂµÄÎ»Í¼ÖÐ
+			// ï¿½ï¿½ï¿½ÉµÄ»ï¿½Í¼ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Âµï¿½Î»Í¼ï¿½ï¿½
 			memDC.DrawBitmap(bitMap, 0, 0);
 		}
 		bitMap = newBitmap;
@@ -89,13 +89,13 @@ void Draw::OnMotion(wxMouseEvent& event) {
 		dc.DrawLine(MiddlePoint, currentPoint);
 
 	}
-	else if (!DrawMode) {//ÓÐÎÊÌâ
+	else if (!DrawMode) {//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		wxPoint offset = currentPoint - dragStartPos;
 		dragStartPos = currentPoint;
-		for (auto& shape : AndGate.shapes) {
+		/*for (auto& shape : AndGate.shapes) {
 			shape.Draw(dc);
-		}
-		if (currentElementId != -1) {
+		}*/
+	/*	if (currentElementId != -1) */{
 			for (auto& element : elements) {
 				if (element.id == currentElementId) {
 					for (auto& shape : element.shapes) {
@@ -128,7 +128,7 @@ void Draw::OnMouseUp(wxMouseEvent& event) {
 		memDC.DrawLine(MiddlePoint, endpoint);
 	}
 	else {
-		for (auto& element : elements) {
+		/*for (auto& element : elements) {
 			if (element.id == currentElementId) {
 				for (auto& shape : element.shapes)
 					shape.Draw(memDC);
@@ -138,7 +138,8 @@ void Draw::OnMouseUp(wxMouseEvent& event) {
 				for (auto& shape : element.shapes)
 					shape.Draw(memDC);
 			}
-		}
+		}*/
+		currentElementId = -1;
 		Refresh();
 		
 
@@ -266,10 +267,12 @@ void Draw::CreateElement() {
 		elements.push_back(NewElement);
 		break;
 	}
-	for (auto& shape : NewElement.shapes) {
-		shape.DrawInit(memDC);
-	}
-	wxString message = wxString::Format("The number is: %d", NewElement.id);
+	//for (auto& shape : NewElement.shapes) {
+	//	shape.DrawInit(memDC);
+	//}
+	
+	wxString message = wxString::Format("å…ƒä»¶ID: %d", NewElement.id);
 	wxMessageBox(message, "Success", wxICON_INFORMATION);
 	Refresh();
+	
 }

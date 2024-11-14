@@ -7,6 +7,7 @@ public:
 	
 	Element() :type(0), id(0), isDragging(false),isSelect(false) {};
 	Element(const Element& element);
+	~Element();
 	Element& operator=(const Element& element);
 	bool Select(const wxPoint& point);
 	void MoveSelected(const wxPoint& point);

@@ -8,6 +8,7 @@ Element::~Element() {
 	this->shapes.clear();
 }
 Element::Element(const Element& element) {
+	this->shapes.clear();
 	for (auto& shape : element.shapes) {
 		this->shapes.push_back(shape);
 	}
@@ -15,8 +16,9 @@ Element::Element(const Element& element) {
 	this->id = element.id;
 
 }
-Element& Element::operator=(const Element& element) {//�ú�����ǰ������ֵ�ǿյ�
+Element& Element::operator=(const Element& element) {
 	if (this == &element)return *this;
+	this->shapes.clear();
 	for (auto& shape : element.shapes) {
 		Shape newShape(shape.type,shape.start, shape.center, shape.end);
 		this->shapes.push_back(newShape);

@@ -3,6 +3,7 @@
 #include<fstream>
 #include"nlohmann/json.hpp"
 #include"element.h"
+#include"Line.h"
 using json = nlohmann::json;
 extern int currentToolId;
 extern bool DrawMode;
@@ -11,7 +12,9 @@ wxPoint dragStartPos;
 wxColour color = *wxBLUE;
 int currentElementId = -1;
 int currentElementTypeId =-1;
+int currentLineId = -1;
 Draw::Draw(wxWindow *parent) :wxPanel(parent) {
+	lineId = 0;
 	for (int i = 0; i < 100; i++)
 		id[i] = 0;
 	LoadFromJSON("and_gate.json");
@@ -23,6 +26,7 @@ Draw::Draw(wxWindow *parent) :wxPanel(parent) {
 	Bind(wxEVT_MOTION, &Draw::OnMotion, this);
 	Bind(wxEVT_LEFT_UP, &Draw::OnMouseUp, this);
 	Bind(wxEVT_SIZE, &Draw::OnResize, this);
+	Bind(wxEVT_RIGHT_DOWN, &Draw::OnRightClick, this);
 }
 
 void Draw::OnResize(wxSizeEvent& event) {
@@ -39,35 +43,58 @@ void Draw::OnResize(wxSizeEvent& event) {
 	}
 	Refresh();  
 }
+
+void Draw::OnRightClick(wxMouseEvent& event) {
+	wxMenu menu;
+	menu.Append(1000, "Delete");
+	ElementSelect(event);
+	LineSelect(event);
+	if (currentElementId != -1) {
+		PopupMenu(&menu, event.GetPosition());
+	}
+	if (currentLineId != -1) {
+		PopupMenu(&menu, event.GetPosition());
+	}
+	
+	Bind(wxEVT_MENU, &Draw::OnMenuSelection, this, 1000);
+}
+
+void Draw::OnMenuSelection(wxCommandEvent& event) {
+	if (event.GetId() == 1000) {
+		if (currentElementId != -1) {
+			for (auto it = elements.begin(); it != elements.end(); ++it) {
+				if (it->id == currentElementId) {
+					elements.erase(it);
+					currentElementId = -1;
+					break;
+				}
+			}
+		}
+		if (currentLineId != -1) {
+			for (auto it = lines.begin(); it != lines.end(); ++it) {
+				if (it->id == currentElementId) {
+					lines.erase(it);
+					currentLineId = -1;//删除直线还未实现
+					break;
+				}
+			}
+		}
+	}
+	
+	Refresh();
+}
 void Draw::OnPaint(wxPaintEvent& event) {
-	//wxAutoBufferedPaintDC dc(this);
 	wxMemoryDC memDC(bitMap);
-	//memDC.Clear();
-	//if (currentElementId != -1) {
-	//	for (auto& element : elements) {
-	//		if (element.id == currentElementId) {
-	//			for (auto& shape : element.shapes) {
-	//				wxPen pen(*wxRED, 2);
-	//				memDC.SetPen(pen);
-	//				shape.Draw(memDC);
-	//			}
-	//		}
-	//		else {
-	//			for (auto& shape : element.shapes) {
-	//				wxPen pen(color, 2);
-	//				memDC.SetPen(pen);
-	//				shape.Draw(memDC);
-	//			}
-	//		}
-	//	}
-	//}
+
 	memDC.DrawBitmap(bitMap, 0, 0);
 }
 void Draw::OnMouseDown(wxMouseEvent& event) {
 	startpoint = event.GetPosition();
 	endpoint = startpoint;
+
 	if (DrawMode) {
 		isDrawing = true;
+		LineSelect(event);
 		
 	}
 	else {
@@ -78,6 +105,7 @@ void Draw::OnMouseDown(wxMouseEvent& event) {
 void Draw::OnMotion(wxMouseEvent& event) {
 	wxPoint currentPoint = event.GetPosition();
 	endpoint = currentPoint;
+	wxPoint offset;
 	wxClientDC dc(this);
 	dc.DrawBitmap(bitMap, 0, 0);
 	wxPen pen(color, 1);
@@ -88,31 +116,52 @@ void Draw::OnMotion(wxMouseEvent& event) {
 		dc.DrawLine(startpoint, MiddlePoint);
 		dc.DrawLine(MiddlePoint, currentPoint);
 
+		
+
+		/*for (auto& element : elements) {
+
+			for (auto& shape : element.shapes) {
+				shape.Draw(dc);
+			}
+		}
+		Refresh();*/
+
 	}
 	else if (!DrawMode) {//������
-		wxPoint offset = currentPoint - dragStartPos;
+		offset = currentPoint - dragStartPos;
 		dragStartPos = currentPoint;
 		/*for (auto& shape : AndGate.shapes) {
 			shape.Draw(dc);
 		}*/
-	/*	if (currentElementId != -1) */{
-			for (auto& element : elements) {
-				if (element.id == currentElementId) {
-					for (auto& shape : element.shapes) {
-						shape.Move(offset.x, offset.y);
-						shape.Draw(dc);
-					}
-				}
-				else {
-					for (auto& shape : element.shapes) {
-						shape.Draw(dc);
-					}
-				}
-			}
-		}
+	/*	if (currentElementId != -1) */
+
+	
 		
 		Refresh();
 	}
+
+
+	for (auto line : lines) {
+		for (auto& shape : line.shapes) {
+			shape.Draw(dc);
+		}
+	}
+
+	for (auto& element : elements) {
+		if (element.id == currentElementId) {
+			for (auto& shape : element.shapes) {
+				shape.Move(offset.x, offset.y);
+				shape.Draw(dc);
+			}
+		}
+		else {
+			for (auto& shape : element.shapes) {
+				shape.Draw(dc);
+			}
+		}
+	}
+
+
 }
 void Draw::OnMouseUp(wxMouseEvent& event) {
 	wxMemoryDC memDC(bitMap);
@@ -121,11 +170,26 @@ void Draw::OnMouseUp(wxMouseEvent& event) {
 	memDC.SetPen(pen);
 	if (DrawMode) {
 		isDrawing = false;
-
-
 		wxPoint MiddlePoint(endpoint.x, startpoint.y);
-		memDC.DrawLine(startpoint, MiddlePoint);
-		memDC.DrawLine(MiddlePoint, endpoint);
+		/*memDC.DrawLine(startpoint, MiddlePoint);
+		memDC.DrawLine(MiddlePoint, endpoint);*/
+
+		Line NewLine;
+		NewLine.id = lineId++;
+		NewLine.shapes.push_back(Shape("line", startpoint, wxPoint((startpoint.x + MiddlePoint.x) / 2,
+			(startpoint.y + MiddlePoint.y) / 2), MiddlePoint));
+		NewLine.shapes.push_back(Shape("line", MiddlePoint, wxPoint((endpoint.x + MiddlePoint.x) / 2,
+			(endpoint.y + MiddlePoint.y) / 2), endpoint));
+		lines.push_back(NewLine);
+
+		/*for (auto line:lines) {
+
+			for (auto& shape : line.shapes) {
+				shape.Draw(memDC);
+			}
+		}*/
+
+		
 	}
 	else {
 		/*for (auto& element : elements) {
@@ -172,11 +236,10 @@ void Draw::OnMouseUp(wxMouseEvent& event) {
 //	Refresh(); 
 //}
 void Draw::ElementSelect(wxMouseEvent& event) {
-	/*wxString message = wxString::Format("The number is: %d", currentElementId);
-	wxMessageBox(message, "Success", wxICON_INFORMATION);*/
 	wxPoint p = event.GetPosition();
-	wxMemoryDC memDC(bitMap);
-	memDC.Clear();
+	currentElementId = -1;
+	//wxMemoryDC memDC(bitMap);
+	//memDC.Clear();
 		for (auto& element : elements) {
 			if (element.Select(p)) {
 				element.isSelect = true;
@@ -188,6 +251,17 @@ void Draw::ElementSelect(wxMouseEvent& event) {
 		Refresh();
 		/*wxString newmessage = wxString::Format("The number is: %d", currentElementId);
 		wxMessageBox(newmessage, "Success", wxICON_INFORMATION);*/
+}
+
+void Draw::LineSelect(wxMouseEvent& event) {
+	wxPoint p = event.GetPosition();
+	currentLineId = -1;
+	for (auto& line : lines) {
+		if (line.Select(p)) {
+			currentLineId = line.id;
+			break;
+		}
+	}
 }
 void Draw::LoadFromJSON(const std::string& filename) {
 	std::ifstream file(filename);

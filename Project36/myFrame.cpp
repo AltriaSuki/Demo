@@ -7,7 +7,7 @@
 #include<vector>
 using json = nlohmann::json;
 int currentToolId = 1000;
-bool DrawMode = false;
+bool DrawMode = true;
 MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(1200, 800)) {
 	menuBar = new wxMenuBar;
 	file = new wxMenu;
@@ -41,9 +41,9 @@ MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaul
         //toolbar->Realize();
         //Connect(wxID_EXIT, wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler(MyFrame::onQuit));
 	wxToolBar* toolBar = CreateToolBar();
-	wxBitmap bitmap(wxT("D:\\wxtest\\bothWXdemo\\and_gate2.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap bitmap(wxT("E:\\VS\\WxDemo\\Project36\\Demo\\Project36\\and_gate2.png"), wxBITMAP_TYPE_PNG);
 	toolBar->AddTool(0, "And Gate", bitmap);
-
+	toolBar->AddTool(1, "Change Mode", bitmap);
 	toolBar->Realize();
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::onQuit, this, wxID_CLOSE);
 	Bind(wxEVT_COMMAND_MENU_SELECTED, &MyFrame::onAbout, this, wxID_ABOUT);
@@ -104,6 +104,17 @@ void MyFrame::OnNewClick(wxCommandEvent& event)//点击new
 	 int toolId = event.GetId();
 	 currentToolId = toolId;
 	 if (toolId <=10&&toolId>=0) {
+		 if (toolId == 1) {
+			 DrawMode = !DrawMode;
+			 if (DrawMode == 1) {
+				 wxMessageBox(wxT("Now is Draw Mode"), wxT("Mode"), wxOK | wxICON_INFORMATION);
+				 Refresh();
+			 }
+			 else {
+				 wxMessageBox(wxT("Now is Select Mode"), wxT("Mode"), wxOK | wxICON_INFORMATION);
+			 }
+			 return;
+		 }
 		 drawPanel->CreateElement();
 		 
 	 }

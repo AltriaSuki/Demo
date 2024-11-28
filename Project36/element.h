@@ -18,7 +18,11 @@ public:
 	void UpdateDragging(const wxPoint& point);
 	bool isSelect = false;
 	std::list<Shape> shapes;
-
+	std::list<int> input;
+	std::list<int> output;
+	std::list<wxPoint> inputPoint;
+	std::list<wxPoint> outputPoint;
+	char operation;
 	int type;
 	int id;
 	bool isDragging;

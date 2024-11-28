@@ -19,9 +19,9 @@ control::control(wxWindow* parent) :wxPanel(parent) {
 
 void control::FillTree()//填充目录树
 {
-	wxTreeItemId root1 = MyTreeCtrl->AddRoot("当前文件");
-	wxTreeItemId dir1 = MyTreeCtrl->AppendItem(root1, "元件库");
-	wxTreeItemId dir2 = MyTreeCtrl->AppendItem(dir1, "与门");
+	wxTreeItemId root1 = MyTreeCtrl->AddRoot("current file");
+	wxTreeItemId dir1 = MyTreeCtrl->AppendItem(root1, "element file");
+	wxTreeItemId dir2 = MyTreeCtrl->AppendItem(dir1, "and gate");
 	int id1 = 0;
 	MyTreeCtrl->SetItemData(dir2, new MyTreeItemData(0));
 
@@ -32,7 +32,7 @@ void control::Fillimage()//填充图标
 {
 	wxImage::AddHandler(new wxPNGHandler);
 	wxImageList* imageList = new wxImageList(16, 16);
-	wxBitmap bitmap(wxT("D:\\wxtest\\bothWXdemo\\and_gate2.png"), wxBITMAP_TYPE_PNG);
+	wxBitmap bitmap(wxT("E:\\VS\\WxDemo\\Project36\\Demo\\Project36\\and_gate2.png"), wxBITMAP_TYPE_PNG);
 	imageList->Add(bitmap);
 	MyTreeCtrl->SetImageList(imageList);
 }

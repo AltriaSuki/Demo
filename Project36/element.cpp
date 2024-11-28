@@ -12,6 +12,20 @@ Element::Element(const Element& element) {
 	for (auto& shape : element.shapes) {
 		this->shapes.push_back(shape);
 	}
+	for (auto& input : element.input) {
+		this->input.push_back(input);
+	}
+	for (auto& output : element.output) {
+		this->output.push_back(output);
+	}
+	for (auto& inputPoint : element.inputPoint) {
+		wxPoint newInputPoint(inputPoint.x, inputPoint.y);
+		this->inputPoint.push_back(newInputPoint);
+	}
+	for (auto& outputPoint : element.outputPoint) {
+		wxPoint newOutputPoint(outputPoint.x, outputPoint.y);
+		this->outputPoint.push_back(newOutputPoint);
+	}
 	this->type = element.type;
 	this->id = element.id;
 
@@ -22,6 +36,24 @@ Element& Element::operator=(const Element& element) {
 	for (auto& shape : element.shapes) {
 		Shape newShape(shape.type,shape.start, shape.center, shape.end);
 		this->shapes.push_back(newShape);
+	}
+	this->input.clear();
+	for (auto& input : element.input) {
+		this->input.push_back(input);
+	}
+	this->output.clear();
+	for (auto& output : element.output) {
+		this->output.push_back(output);
+	}
+	this->inputPoint.clear();
+	for (auto& inputPoint : element.inputPoint) {
+		wxPoint newInputPoint(inputPoint.x, inputPoint.y);
+		this->inputPoint.push_back(newInputPoint);
+	}
+	this->outputPoint.clear();
+	for (auto& outputPoint : element.outputPoint) {
+		wxPoint newOutputPoint(outputPoint.x, outputPoint.y);
+		this->outputPoint.push_back(newOutputPoint);
 	}
 	this->type = element.type;
 	this->id = element.id;

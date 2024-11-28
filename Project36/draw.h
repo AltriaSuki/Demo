@@ -18,7 +18,6 @@ public :
 	Element AndGate;
 	Element OrGate;
 	Element NandGate;
-	void DrawAll();
 	void ElementSelect(wxMouseEvent& event);
 	void LineSelect(wxMouseEvent& event);
 	void CreateElement();

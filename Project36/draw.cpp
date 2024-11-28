@@ -13,6 +13,12 @@ wxColour color = *wxBLUE;
 int currentElementId = -1;
 int currentElementTypeId =-1;
 int currentLineId = -1;
+bool isStartFromElement=false;
+wxPoint currentOutputPoint;
+wxPoint currentInputPoint;
+bool isPointInCircle(wxPoint p, wxPoint center, int radius) {
+	return (p.x - center.x) * (p.x - center.x) + (p.y - center.y) * (p.y - center.y) <= radius * radius;
+}
 Draw::Draw(wxWindow *parent) :wxPanel(parent) {
 	lineId = 0;
 	for (int i = 0; i < 100; i++)
@@ -93,8 +99,45 @@ void Draw::OnMouseDown(wxMouseEvent& event) {
 	endpoint = startpoint;
 
 	if (DrawMode) {
-		isDrawing = true;
-		LineSelect(event);
+		//进行限制连线操作。
+		for (auto element : elements) {
+			for (auto inputpoint : element.inputPoint)
+				if (isPointInCircle(startpoint,inputpoint,5)) {
+					isDrawing = true;
+					startpoint = inputpoint;
+					LineSelect(event);
+					isStartFromElement = true;
+					break;
+				}
+			if (isDrawing)break;
+			for (auto outputpoint : element.outputPoint)
+				if (isPointInCircle(startpoint, outputpoint, 5)) {
+					isDrawing = true;
+					startpoint = outputpoint;
+					isStartFromElement = true;
+					LineSelect(event);
+					break;
+				}
+		}
+		if (!isDrawing) {
+			isStartFromElement = false;
+			for (auto line : lines) {
+				for (auto shape : line.shapes) {
+					if (shape.Contains(startpoint)) {
+						isDrawing = true;
+						if (shape.start.y == shape.end.y) {
+							startpoint.y = shape.start.y;
+						}
+						else if (shape.start.x == shape.end.x) {
+							startpoint.x = shape.start.x;
+						}
+						//startpoint.x = shape.start.x;
+						break;
+					}
+				}
+				if (isDrawing)break;
+			}
+		}
 		
 	}
 	else {
@@ -108,10 +151,16 @@ void Draw::OnMotion(wxMouseEvent& event) {
 	wxPoint offset;
 	wxClientDC dc(this);
 	dc.DrawBitmap(bitMap, 0, 0);
-	wxPen pen(color, 1);
+	wxPen pen(color, 2);
 	dc.SetPen(pen);
 	if (isDrawing) {
-		wxPoint MiddlePoint(currentPoint.x, startpoint.y);
+
+		wxPoint MiddlePoint;
+		if (isStartFromElement)MiddlePoint = wxPoint(currentPoint.x, startpoint.y);
+		else {
+			MiddlePoint = wxPoint(startpoint.x, currentPoint.y);
+		}
+		
 
 		dc.DrawLine(startpoint, MiddlePoint);
 		dc.DrawLine(MiddlePoint, currentPoint);
@@ -127,7 +176,7 @@ void Draw::OnMotion(wxMouseEvent& event) {
 		Refresh();*/
 
 	}
-	else if (!DrawMode) {//������
+	else if (!DrawMode) {
 		offset = currentPoint - dragStartPos;
 		dragStartPos = currentPoint;
 		/*for (auto& shape : AndGate.shapes) {
@@ -146,9 +195,19 @@ void Draw::OnMotion(wxMouseEvent& event) {
 			shape.Draw(dc);
 		}
 	}
-
+	
 	for (auto& element : elements) {
 		if (element.id == currentElementId) {
+			for (auto &outputpoint : element.outputPoint) {
+				outputpoint.x += offset.x;
+				outputpoint.y += offset.y;
+
+
+			}
+			for (auto &inputpoint : element.inputPoint) {
+				inputpoint.x += offset.x;
+				inputpoint.y += offset.y;
+			}
 			for (auto& shape : element.shapes) {
 				shape.Move(offset.x, offset.y);
 				shape.Draw(dc);
@@ -166,14 +225,18 @@ void Draw::OnMotion(wxMouseEvent& event) {
 void Draw::OnMouseUp(wxMouseEvent& event) {
 	wxMemoryDC memDC(bitMap);
 	memDC.Clear();
-	wxPen pen(color, 1);
+	wxPen pen(color, 2);
 	memDC.SetPen(pen);
-	if (DrawMode) {
+	if (DrawMode&&isDrawing==true) {
 		isDrawing = false;
-		wxPoint MiddlePoint(endpoint.x, startpoint.y);
+		//wxMessageBox("Drawing", "Success", wxICON_INFORMATION);
 		/*memDC.DrawLine(startpoint, MiddlePoint);
 		memDC.DrawLine(MiddlePoint, endpoint);*/
-
+		wxPoint MiddlePoint;
+		if (isStartFromElement)MiddlePoint = wxPoint(endpoint.x, startpoint.y);
+		else {
+			MiddlePoint = wxPoint(startpoint.x, endpoint.y);
+		}
 		Line NewLine;
 		NewLine.id = lineId++;
 		NewLine.shapes.push_back(Shape("line", startpoint, wxPoint((startpoint.x + MiddlePoint.x) / 2,
@@ -210,31 +273,6 @@ void Draw::OnMouseUp(wxMouseEvent& event) {
 	}
 }
 
-//void Draw::DrawAll() {
-//	wxMemoryDC memDC(bitMap);
-//	wxPen pen(color, 2);
-//	memDC.SetPen(pen);
-//	switch (currentToolId) {
-//	case 0:
-//		for (auto& shape : AndGate.shapes) {
-//			shape.DrawInit(memDC);
-//		}
-//		break;
-//	case 1:
-//		for (auto& shape : OrGate.shapes) {
-//			shape.DrawInit(memDC);
-//		}
-//		break;
-//	case 2:
-//		for (auto& shape : NandGate.shapes) {
-//			shape.DrawInit(memDC);
-//		}
-//		break;
-//	}
-//	
-//
-//	Refresh(); 
-//}
 void Draw::ElementSelect(wxMouseEvent& event) {
 	wxPoint p = event.GetPosition();
 	currentElementId = -1;
@@ -301,6 +339,7 @@ void Draw::LoadFromJSON(const std::string& filename) {
 	else {
 		wxMessageBox("Failed to open file", "Error", wxICON_ERROR);
 	}
+	AndGate.outputPoint.push_back(wxPoint(40, 30));
 }
 void Draw::CreateElement() {
 	wxMemoryDC memDC(bitMap);
@@ -344,8 +383,7 @@ void Draw::CreateElement() {
 	//for (auto& shape : NewElement.shapes) {
 	//	shape.DrawInit(memDC);
 	//}
-	
-	wxString message = wxString::Format("元件ID: %d", NewElement.id);
+	wxString message = wxString::Format("id: %d", NewElement.id);
 	wxMessageBox(message, "Success", wxICON_INFORMATION);
 	Refresh();
 	

@@ -11,5 +11,6 @@ public:
 	Line& operator=(const Line& line);
 	bool Select(const wxPoint& point);
 	int id;
+	int signal;
 
 };

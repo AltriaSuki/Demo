@@ -36,13 +36,13 @@ Draw::Draw(wxWindow *parent) :wxPanel(parent) {
 }
 
 void Draw::OnResize(wxSizeEvent& event) {
-	// �ڴ��ڴ�С�仯ʱ���´���λͼ����Ӧ�³ߴ�
+
 	if (GetClientSize().GetWidth() > 0 && GetClientSize().GetHeight() > 0) {
 		wxBitmap newBitmap(GetClientSize());
 		wxMemoryDC memDC(newBitmap);
 		memDC.Clear();
 		if (bitMap.IsOk()) {
-			// ���ɵĻ�ͼ���ݿ������µ�λͼ��
+
 			memDC.DrawBitmap(bitMap, 0, 0);
 		}
 		bitMap = newBitmap;
@@ -77,10 +77,11 @@ void Draw::OnMenuSelection(wxCommandEvent& event) {
 			}
 		}
 		if (currentLineId != -1) {
+			
 			for (auto it = lines.begin(); it != lines.end(); ++it) {
-				if (it->id == currentElementId) {
+				if (it->id == currentLineId) {
 					lines.erase(it);
-					currentLineId = -1;//删除直线还未实现
+					currentLineId = -1;
 					break;
 				}
 			}
@@ -99,7 +100,6 @@ void Draw::OnMouseDown(wxMouseEvent& event) {
 	endpoint = startpoint;
 
 	if (DrawMode) {
-		//进行限制连线操作。
 		for (auto element : elements) {
 			for (auto inputpoint : element.inputPoint)
 				if (isPointInCircle(startpoint,inputpoint,5)) {
@@ -165,27 +165,11 @@ void Draw::OnMotion(wxMouseEvent& event) {
 		dc.DrawLine(startpoint, MiddlePoint);
 		dc.DrawLine(MiddlePoint, currentPoint);
 
-		
-
-		/*for (auto& element : elements) {
-
-			for (auto& shape : element.shapes) {
-				shape.Draw(dc);
-			}
-		}
-		Refresh();*/
-
 	}
 	else if (!DrawMode) {
 		offset = currentPoint - dragStartPos;
 		dragStartPos = currentPoint;
-		/*for (auto& shape : AndGate.shapes) {
-			shape.Draw(dc);
-		}*/
-	/*	if (currentElementId != -1) */
-
-	
-		
+			
 		Refresh();
 	}
 
@@ -229,9 +213,6 @@ void Draw::OnMouseUp(wxMouseEvent& event) {
 	memDC.SetPen(pen);
 	if (DrawMode&&isDrawing==true) {
 		isDrawing = false;
-		//wxMessageBox("Drawing", "Success", wxICON_INFORMATION);
-		/*memDC.DrawLine(startpoint, MiddlePoint);
-		memDC.DrawLine(MiddlePoint, endpoint);*/
 		wxPoint MiddlePoint;
 		if (isStartFromElement)MiddlePoint = wxPoint(endpoint.x, startpoint.y);
 		else {
@@ -245,27 +226,12 @@ void Draw::OnMouseUp(wxMouseEvent& event) {
 			(endpoint.y + MiddlePoint.y) / 2), endpoint));
 		lines.push_back(NewLine);
 
-		/*for (auto line:lines) {
 
-			for (auto& shape : line.shapes) {
-				shape.Draw(memDC);
-			}
-		}*/
 
 		
 	}
 	else {
-		/*for (auto& element : elements) {
-			if (element.id == currentElementId) {
-				for (auto& shape : element.shapes)
-					shape.Draw(memDC);
-				currentElementId = -1;
-			}
-			else {
-				for (auto& shape : element.shapes)
-					shape.Draw(memDC);
-			}
-		}*/
+
 		currentElementId = -1;
 		Refresh();
 		
@@ -276,8 +242,7 @@ void Draw::OnMouseUp(wxMouseEvent& event) {
 void Draw::ElementSelect(wxMouseEvent& event) {
 	wxPoint p = event.GetPosition();
 	currentElementId = -1;
-	//wxMemoryDC memDC(bitMap);
-	//memDC.Clear();
+
 		for (auto& element : elements) {
 			if (element.Select(p)) {
 				element.isSelect = true;
@@ -287,8 +252,7 @@ void Draw::ElementSelect(wxMouseEvent& event) {
 			}
 		}
 		Refresh();
-		/*wxString newmessage = wxString::Format("The number is: %d", currentElementId);
-		wxMessageBox(newmessage, "Success", wxICON_INFORMATION);*/
+
 }
 
 void Draw::LineSelect(wxMouseEvent& event) {
@@ -345,23 +309,6 @@ void Draw::CreateElement() {
 	wxMemoryDC memDC(bitMap);
 	wxPen pen(color, 1);
 	memDC.SetPen(pen);
-	/*switch (currentToolId) {
-	case 0:
-		for (auto& shape : AndGate.shapes) {
-			shape.DrawInit(memDC);
-		}
-		break;
-	case 1:
-		for (auto& shape : OrGate.shapes) {
-			shape.DrawInit(memDC);
-		}
-		break;
-	case 2:
-		for (auto& shape : NandGate.shapes) {
-			shape.DrawInit(memDC);
-		}
-		break;
-	}*/
 	Element NewElement;
 	switch (currentToolId) {
 	case 0:
@@ -380,9 +327,6 @@ void Draw::CreateElement() {
 		elements.push_back(NewElement);
 		break;
 	}
-	//for (auto& shape : NewElement.shapes) {
-	//	shape.DrawInit(memDC);
-	//}
 	wxString message = wxString::Format("id: %d", NewElement.id);
 	wxMessageBox(message, "Success", wxICON_INFORMATION);
 	Refresh();

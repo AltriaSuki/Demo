@@ -7,7 +7,7 @@
 #include<vector>
 using json = nlohmann::json;
 int currentToolId = 1000;
-bool DrawMode = true;
+bool DrawMode = false;
 MyFrame::MyFrame(const wxString& title) :wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(1200, 800)) {
 	menuBar = new wxMenuBar;
 	file = new wxMenu;
